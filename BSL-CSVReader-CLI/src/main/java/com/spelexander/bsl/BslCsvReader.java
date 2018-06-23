@@ -2,8 +2,6 @@ package com.spelexander.bsl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.JCommander;
@@ -21,17 +19,14 @@ public class BslCsvReader {
 	private static final String EMAIL = "support@fakemail.com";
 	private static final String UNCAUGHT_ERROR = "An unexplained error has occured please contact support at " + EMAIL;
 
-	@Parameter
-	private List<String> parameters = new ArrayList<>();
-
 	@Parameter(names = { "-h", "-help" }, description = "Show usage/help information for tool")
 	private boolean help = false;
 
 	@Parameter(names = { "-log", "-verbose" }, description = "Level of verbosity")
 	private Integer verbose = 1;
 
-	@Parameter(names = { "-p", "-progress" }, description = "Show progress of reading")
-	private Integer progress = 1;
+	@Parameter(names = { "-p", "-progress" }, description = "Show progress of reading (defaults to True)")
+	private boolean progress = true;
 
 	@Parameter(names = "-debug", hidden = true, description = "Debug mode")
 	private boolean debug = false;
@@ -51,6 +46,9 @@ public class BslCsvReader {
 	public class FileConverter implements IStringConverter<File> {
 		@Override
 		public File convert(String value) {
+			if (value == null) { 
+				return null;
+			}
 			return new File(value);
 		}
 	}
@@ -77,11 +75,12 @@ public class BslCsvReader {
 	 * Previously defined Arg variables have been populated depending on String arguments.
 	 */
 	public void run() {
-		// Sorting code runs here
 		try {
-
+			validate();
+			
 			if (this.help) {
 				mainInstance.usage();
+				return;
 			}
 
 		} catch (Exception e) {
@@ -102,6 +101,33 @@ public class BslCsvReader {
 			}
 
 			mainInstance.usage();
+		}
+	}
+
+	/**
+	 * Error checking for params and input files.
+	 * @throws IOException
+	 * @throws ParameterException
+	 */
+	private void validate() throws IOException, ParameterException {
+		if (length >= 0)
+			throw new ParameterException("Number of output sorted entries must > 0. '" + length + "' is not valid.");
+		
+		if (file == null)
+			throw new ParameterException("Input file must be specified");
+		
+		if (! file.exists())
+			throw new IOException("Input file '" + file.getAbsolutePath() + "' does not exist!");
+		
+		if (! file.canRead())
+			throw new IOException("Cannot read input file '" + file.getAbsolutePath() + "'");
+		
+		if (output != null) {
+			if (output.exists())
+				throw new IOException("Cannot override output file. '" + output.getAbsolutePath() + "' already exists!");
+			
+			if (! output.createNewFile()) 
+				throw new IOException("Cannot write to output file '" + output.getAbsolutePath() + "'");
 		}
 	}
 
