@@ -76,13 +76,15 @@ public class BslCsvReader {
 	 */
 	public void run() {
 		try {
-			validate();
-			
 			if (this.help) {
 				mainInstance.usage();
 				return;
 			}
-
+			
+			validate();
+			BslCsvSorter sorter = new BslCsvSorter(verbose, progress, debug);
+			sorter.readCsv(file, length);
+			
 		} catch (Exception e) {
 			if (this.verbose > 1) {
 				e.printStackTrace();
@@ -114,7 +116,10 @@ public class BslCsvReader {
 			throw new ParameterException("Number of output sorted entries must > 0. '" + length + "' is not valid.");
 		
 		if (file == null)
-			throw new ParameterException("Input file must be specified");
+			throw new ParameterException("Input files must be specified");
+		
+		if (file.getName().toLowerCase().endsWith(".csv"))
+			throw new ParameterException("Input files must be a CSV format");
 		
 		if (! file.exists())
 			throw new IOException("Input file '" + file.getAbsolutePath() + "' does not exist!");
