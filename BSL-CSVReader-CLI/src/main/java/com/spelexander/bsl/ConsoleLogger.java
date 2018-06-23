@@ -20,4 +20,11 @@ public class ConsoleLogger {
 		System.out.println(message);
 	}
 	
+	private static final String start = "|";
+	private static final String end = "\r";
+	
+	public static void updateProgress(double progress, String memory) {
+		System.out.print(start + String.valueOf(progress) + end);
+	}
+	
 }
