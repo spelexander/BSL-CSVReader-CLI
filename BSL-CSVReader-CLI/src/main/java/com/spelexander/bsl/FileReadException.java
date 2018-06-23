@@ -34,19 +34,19 @@ public class FileReadException extends Exception {
 	 * Line where the exception occurred
 	 * @return
 	 */
-	public Integer getLine() {
+	public Long getLine() {
 		return line;
 	}
 
-	public void setLine(Integer line) {
+	public void setLine(Long line) {
 		this.line = line;
 	}
 
 	private File file;
 	private String message;
-	private Integer line;
+	private Long line;
 
-	public FileReadException(File file, String message, Integer line) {
+	public FileReadException(File file, String message, Long line) {
 		super(message);
 		
 		this.file = file;
