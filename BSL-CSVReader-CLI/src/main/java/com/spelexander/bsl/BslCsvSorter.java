@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.spelexander.bsl.model.BslEntry;
@@ -37,7 +39,9 @@ public class BslCsvSorter {
 	}
 
 	private Long lineNumber = 0L;
-
+	
+	private List<BslEntry> cachedEntries = new ArrayList<>();
+	
 	/**
 	 * Main sorting method. Compares each entry on the basis of division and then points. 
 	 * Will remove cache (not storing all entries in memory) if requested.
@@ -48,6 +52,9 @@ public class BslCsvSorter {
 	 */
 	public void readCsv(File file, int length) throws FileReadException, IOException {
 
+		cachedEntries.clear();
+		List<BslEntry> sortedEntries = new ArrayList<>();
+		
 		Map<String,Integer> headingIndex = new HashMap<>();
 
 		InputStream inputFS = new FileInputStream(file);
@@ -60,7 +67,11 @@ public class BslCsvSorter {
 				populateHeadings(line, headingIndex);
 			} else {
 				BslEntry entry = new BslEntry(file, headingIndex, line, lineNumber);
+				sortFunction(entry, sortedEntries, length);
 				
+				if (cache) {
+					cachedEntries.add(entry);
+				}
 			}
 			lineNumber++;
 		}
@@ -77,12 +88,28 @@ public class BslCsvSorter {
 	}
 
 	/**
+	 * Checks whether it should add the entry to the list of return objects - on the basis of sort.
+	 * @param entry
+	 * @param sortedEntries
+	 * @param length
+	 */
+	private void sortFunction(BslEntry entry, List<BslEntry> sortedEntries, int length) {
+		if (sortedEntries.size() < length) {
+			// Add anything to list
+			
+		} else {
+			// Check whether it should be added on the basis of sort.
+			
+		}
+	}
+
+	/**
 	 * Get our heading index for later parsing (We don't know what order they will be given to us as!)
-	 * @param t
+	 * @param headingLine
 	 * @param headingIndex
 	 */
-	private void populateHeadings(String t, final Map<String, Integer> headingIndex) {
-		String[] parts = t.split(",");
+	private void populateHeadings(String headingLine, final Map<String, Integer> headingIndex) {
+		String[] parts = headingLine.split(",");
 		int index = 0;
 
 		for (String heading : parts) {

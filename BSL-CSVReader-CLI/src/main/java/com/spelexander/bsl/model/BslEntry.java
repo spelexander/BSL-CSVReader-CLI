@@ -4,16 +4,45 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
+
+// Static import of sort methods
+import static java.util.Collections.reverseOrder;
+import static java.util.Comparator.comparingInt;
 
 /**
  * Entry class representing each row of input CSV (and used for YAML output).
  * @author alexs
  *
  */
-public class BslEntry {
+public class BslEntry implements Comparable<BslEntry> {
 	
+	public String getFirstname() {
+		return firstname;
+	}
+
+	public String getLastname() {
+		return lastname;
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public Integer getDivision() {
+		return division;
+	}
+
+	public Integer getPoints() {
+		return points;
+	}
+
+	public String getSummary() {
+		return summary;
+	}
+
 	public String firstname;
 	
 	public String lastname;
@@ -72,6 +101,16 @@ public class BslEntry {
 				}
 			}
 		}	
+	}
+	
+	/**
+	 * Compares first division ascending then points descending.
+	 */
+	@Override
+	public int compareTo(BslEntry entry){	
+	    return Comparator.comparingInt(BslEntry::getDivision)
+	              .thenComparing(reverseOrder(comparingInt(BslEntry::getPoints)))
+	              .compare(this, entry);
 	}
 	
 }
