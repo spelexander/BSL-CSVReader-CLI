@@ -37,3 +37,9 @@ dependencies {
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.6'
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.spelexander.bsl.BslCsvReader'
+    }
+}
+
