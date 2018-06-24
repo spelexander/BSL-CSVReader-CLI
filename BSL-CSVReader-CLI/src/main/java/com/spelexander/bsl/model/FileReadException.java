@@ -1,4 +1,4 @@
-package com.spelexander.bsl;
+package com.spelexander.bsl.model;
 
 import java.io.File;
 

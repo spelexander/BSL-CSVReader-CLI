@@ -1,4 +1,4 @@
-package com.spelexander.bsl;
+package com.spelexander.bsl.util;
 
 public class ConsoleLogger {
 

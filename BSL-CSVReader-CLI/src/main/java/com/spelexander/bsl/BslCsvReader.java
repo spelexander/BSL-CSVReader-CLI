@@ -7,6 +7,7 @@ import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.spelexander.bsl.model.FileReadException;
 
 public class BslCsvReader {
 
@@ -30,6 +31,7 @@ public class BslCsvReader {
 
 	@Parameter(names = "-debug", hidden = true, description = "Debug mode")
 	private boolean debug = false;
+	
 
 	@Parameter(names={"-length", "-l"}, description = "Top -l records to display when sorting (defaults to 3)")
 	int length = 3;
@@ -37,6 +39,9 @@ public class BslCsvReader {
 	@Parameter(names = "-file", converter = FileConverter.class, description = "Input csv file containing entries to be sorted")
 	File file;
 
+	@Parameter(names = "-cache", description = "Cache entries in memory for later retrieval (defaults to False)")
+	private boolean cache = false;
+	
 	@Parameter(names = "-output", converter = FileConverter.class, description = "Destination file of sorted entries (defaults to printf)")
 	File output;
 
@@ -82,7 +87,7 @@ public class BslCsvReader {
 			}
 			
 			validate();
-			BslCsvSorter sorter = new BslCsvSorter(verbose, progress, debug);
+			BslCsvSorter sorter = new BslCsvSorter(verbose, progress, debug, cache);
 			sorter.readCsv(file, length);
 			
 		} catch (Exception e) {

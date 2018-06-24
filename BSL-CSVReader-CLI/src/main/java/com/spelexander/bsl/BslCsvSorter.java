@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.spelexander.bsl.model.BslEntry;
+import com.spelexander.bsl.model.FileReadException;
+
 public class BslCsvSorter {
 
 	private final Integer verbose;
@@ -17,7 +20,7 @@ public class BslCsvSorter {
 	
 	private final boolean debug;
 	
-	private final boolean dontCache;
+	private final boolean cache;
 
 	/**
 	 * Constructor
@@ -26,11 +29,11 @@ public class BslCsvSorter {
 	 * @param debug
 	 * @param dontCache
 	 */
-	public BslCsvSorter(Integer verbose, boolean progress, boolean debug, boolean dontCache) {
+	public BslCsvSorter(Integer verbose, boolean progress, boolean debug, boolean cache) {
 		this.verbose = verbose;
 		this.progress = progress;
 		this.debug = debug;
-		this.dontCache= dontCache;
+		this.cache = cache;
 	}
 
 	private Long lineNumber = 0L;
