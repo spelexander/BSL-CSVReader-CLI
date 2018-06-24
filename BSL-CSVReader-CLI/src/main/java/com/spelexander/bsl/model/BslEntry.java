@@ -115,5 +115,9 @@ public class BslEntry implements Comparable<BslEntry> {
 	              .thenComparing(reverseOrder(comparingInt(BslEntry::getPoints)))
 	              .compare(this, entry);
 	}
+
+	public String getDateAsString() {
+		return sdf.format(date);
+	}
 	
 }

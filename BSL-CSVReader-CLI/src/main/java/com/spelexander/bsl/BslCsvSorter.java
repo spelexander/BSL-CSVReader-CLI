@@ -14,6 +14,7 @@ import java.util.Map;
 
 import com.spelexander.bsl.model.BslEntry;
 import com.spelexander.bsl.model.FileReadException;
+import com.spelexander.bsl.util.ConsoleLogger;
 
 public class BslCsvSorter {
 
@@ -25,6 +26,9 @@ public class BslCsvSorter {
 	
 	private final boolean cache;
 
+	// Taken from averaged row sizes in bytes
+	private static final Long lineSize = 48L;
+	
 	/**
 	 * Constructor
 	 * @param verbose
@@ -53,7 +57,8 @@ public class BslCsvSorter {
 	 * @throws IOException 
 	 */
 	public List<BslEntry> readCsv(File file, int length) throws FileReadException, IOException {
-
+		lineNumber = 0L;
+		
 		cachedEntries.clear();
 		List<BslEntry> sortedEntries = new ArrayList<>();
 		
@@ -62,9 +67,14 @@ public class BslCsvSorter {
 		InputStream inputFS = new FileInputStream(file);
 		BufferedReader br = new BufferedReader(new InputStreamReader(inputFS));
 
+		// Get file length to make estimate for read time (don't want to call anything that will increase complexity such as lines)
+		Long bytes = file.length();
+		Long expectedLines = bytes / lineSize;
+		
 		// Chose this instead of Java 8 for better exception throwing ability.
 		String line;
 		while ((line = br.readLine()) != null) {
+			
 			if (lineNumber == 0) {
 				populateHeadings(line, headingIndex);
 			} else {
@@ -76,6 +86,8 @@ public class BslCsvSorter {
 					cachedEntries.add(entry);
 				}
 			}
+			
+			ConsoleLogger.updateProgress((Double) lineNumber.doubleValue() / expectedLines.doubleValue());
 			lineNumber++;
 		}
 
