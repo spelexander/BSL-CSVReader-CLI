@@ -2,16 +2,19 @@ package com.spelexander.bsl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.spelexander.bsl.model.BslEntry;
 import com.spelexander.bsl.model.FileReadException;
+import com.spelexander.bsl.util.ConsoleLogger;
 
 public class BslCsvReader {
 
-	private static final String PARAMETER_ERROR = "Command Arguments entered were not valid or malformed. See Usage:";
+	private static final String PARAMETER_ERROR = "Command Arguments entered were not valid. See Errors:";
 
 	private static final String PARSING_ERROR = "One or more input file provided had errors. See Errors:";
 
@@ -31,7 +34,7 @@ public class BslCsvReader {
 
 	@Parameter(names = "-debug", hidden = true, description = "Debug mode")
 	private boolean debug = false;
-	
+
 
 	@Parameter(names={"-length", "-l"}, description = "Top -l records to display when sorting (defaults to 3)")
 	int length = 3;
@@ -41,7 +44,7 @@ public class BslCsvReader {
 
 	@Parameter(names = "-cache", description = "Cache entries in memory for later retrieval (defaults to False)")
 	private boolean cache = false;
-	
+
 	@Parameter(names = "-output", converter = FileConverter.class, description = "Destination file of sorted entries (defaults to printf)")
 	File output;
 
@@ -85,11 +88,18 @@ public class BslCsvReader {
 				mainInstance.usage();
 				return;
 			}
-			
+
 			validate();
 			BslCsvSorter sorter = new BslCsvSorter(verbose, progress, debug, cache);
-			sorter.readCsv(file, length);
-			
+			List<BslEntry> entries = sorter.readCsv(file, length);
+
+			String yaml = ConsoleLogger.getEntriesAsYaml(entries);
+			if (output != null) {
+				writeEntriesToFile(entries);
+			} else {
+				ConsoleLogger.print(yaml);
+			}
+
 		} catch (Exception e) {
 			if (this.verbose > 1) {
 				e.printStackTrace();
@@ -98,17 +108,29 @@ public class BslCsvReader {
 			// We want to catch all exceptions gracefully
 			if (e instanceof ParameterException) {
 				// Parameter error.
-
+				ConsoleLogger.print(PARAMETER_ERROR);
+				ConsoleLogger.error(e.getMessage());
 			} else if (e instanceof FileReadException) {
 				// Parsing Error.
-
+				ConsoleLogger.print(PARSING_ERROR);
+				ConsoleLogger.error(e.getMessage());
 			} else if (e instanceof IOException) {
 				// File finding/reading/writing error.
-
+				ConsoleLogger.print(FILE_ERROR);
+				ConsoleLogger.error(e.getMessage());
 			}
 
 			mainInstance.usage();
 		}
+	}
+
+	/**
+	 * If an output is specified this is where we write the entries to it.
+	 * @param entries
+	 */
+	private void writeEntriesToFile(List<BslEntry> entries) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
@@ -117,25 +139,25 @@ public class BslCsvReader {
 	 * @throws ParameterException
 	 */
 	private void validate() throws IOException, ParameterException {
-		if (length >= 0)
-			throw new ParameterException("Number of output sorted entries must > 0. '" + length + "' is not valid.");
-		
+		if (length <= 0)
+			throw new ParameterException("Number of output sorted entries '-l' must > 0. '" + length + "' is not valid.");
+
 		if (file == null)
-			throw new ParameterException("Input files must be specified");
-		
+			throw new ParameterException("Input file '-file' must be specified");
+
 		if (file.getName().toLowerCase().endsWith(".csv"))
-			throw new ParameterException("Input files must be a CSV format");
-		
+			throw new ParameterException("Input file '-file' must be a CSV format");
+
 		if (! file.exists())
 			throw new IOException("Input file '" + file.getAbsolutePath() + "' does not exist!");
-		
+
 		if (! file.canRead())
 			throw new IOException("Cannot read input file '" + file.getAbsolutePath() + "'");
-		
+
 		if (output != null) {
 			if (output.exists())
 				throw new IOException("Cannot override output file. '" + output.getAbsolutePath() + "' already exists!");
-			
+
 			if (! output.createNewFile()) 
 				throw new IOException("Cannot write to output file '" + output.getAbsolutePath() + "'");
 		}

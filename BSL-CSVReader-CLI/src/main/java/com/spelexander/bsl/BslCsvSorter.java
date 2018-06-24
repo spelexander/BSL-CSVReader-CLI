@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +49,10 @@ public class BslCsvSorter {
 	 * Outputs a response object with the <length> number of records sorted.
 	 * @param file
 	 * @param length
+	 * @return 
 	 * @throws IOException 
 	 */
-	public void readCsv(File file, int length) throws FileReadException, IOException {
+	public List<BslEntry> readCsv(File file, int length) throws FileReadException, IOException {
 
 		cachedEntries.clear();
 		List<BslEntry> sortedEntries = new ArrayList<>();
@@ -70,6 +72,7 @@ public class BslCsvSorter {
 				sortFunction(entry, sortedEntries, length);
 				
 				if (cache) {
+					// For additional functionality that may be needed later - lookups etc.
 					cachedEntries.add(entry);
 				}
 			}
@@ -84,7 +87,7 @@ public class BslCsvSorter {
 			}
 		}
 
-
+		return sortedEntries;
 	}
 
 	/**
@@ -94,12 +97,12 @@ public class BslCsvSorter {
 	 * @param length
 	 */
 	private void sortFunction(BslEntry entry, List<BslEntry> sortedEntries, int length) {
-		if (sortedEntries.size() < length) {
-			// Add anything to list
-			
-		} else {
-			// Check whether it should be added on the basis of sort.
-			
+		sortedEntries.add(entry);
+		Collections.sort(sortedEntries);
+
+		// We want to restrict the number of entries we have to what we want to return
+		if (sortedEntries.size() > length) {
+			sortedEntries.remove(length);
 		}
 	}
 

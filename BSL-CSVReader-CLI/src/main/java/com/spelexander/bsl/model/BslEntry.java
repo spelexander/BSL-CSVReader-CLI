@@ -2,6 +2,7 @@ package com.spelexander.bsl.model;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -72,7 +73,9 @@ public class BslEntry implements Comparable<BslEntry> {
 		Field[] fields = this.getClass().getFields();
 		for (Field field : fields) {
 			// Only using public fields for csv objects
-			if (field.isAccessible()) {
+			field.setAccessible(true);
+			
+			if (field.isAccessible() && Modifier.isPublic(field.getModifiers())) {
 				Integer index = headingIndex.get(field.getName());
 				
 				if (index != null) {
@@ -82,7 +85,7 @@ public class BslEntry implements Comparable<BslEntry> {
 							// Date field
 							field.set(this, sdf.parse(parts[index]));
 							
-						} else if (field.getType().isAssignableFrom(Date.class)) {
+						} else if (field.getType().isAssignableFrom(Integer.class)) {
 							// Integer field
 							field.set(this, Integer.parseInt(parts[index]));
 							
