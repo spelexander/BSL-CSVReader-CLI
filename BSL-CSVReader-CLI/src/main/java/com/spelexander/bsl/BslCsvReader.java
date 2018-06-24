@@ -2,6 +2,8 @@ package com.spelexander.bsl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import com.beust.jcommander.IStringConverter;
@@ -23,29 +25,29 @@ public class BslCsvReader {
 	private static final String EMAIL = "support@fakemail.com";
 	private static final String UNCAUGHT_ERROR = "An unexplained error has occured please contact support at " + EMAIL;
 
-	@Parameter(names = { "-h", "-help" }, description = "Show usage/help information for tool")
+	// Below are input params
+	@Parameter(names = { "-h", "-help" }, description = "Show usage/help information for tool", order = 0)
 	private boolean help = false;
 
-	@Parameter(names = { "-log", "-verbose" }, description = "Level of verbosity")
+	@Parameter(names = { "-log", "-verbose" }, description = "Level of verbosity", order = 4)
 	private Integer verbose = 1;
 
-	@Parameter(names = { "-p", "-progress" }, description = "Show progress of reading (defaults to True)")
-	private boolean progress = true;
+	@Parameter(names = { "-p", "-progress" }, description = "Show progress of file processing", order = 5)
+	private boolean progress = false;
 
 	@Parameter(names = "-debug", hidden = true, description = "Debug mode")
 	private boolean debug = false;
 
-
-	@Parameter(names={"-length", "-l"}, description = "Top -l records to display when sorting (defaults to 3)")
+	@Parameter(names={"-length", "-l"}, description = "Top -l records to display when sorting", order = 2)
 	int length = 3;
 
-	@Parameter(names = "-file", converter = FileConverter.class, description = "Input csv file containing entries to be sorted")
+	@Parameter(names = "-file", converter = FileConverter.class, description = "Input csv file containing entries to be sorted", order = 1)
 	File file;
 
-	@Parameter(names = "-cache", description = "Cache entries in memory for later retrieval (defaults to False)")
+	@Parameter(names = "-cache", description = "Cache entries in memory for later retrieval", order = 6)
 	private boolean cache = false;
 
-	@Parameter(names = "-output", converter = FileConverter.class, description = "Destination file of sorted entries (defaults to printf)")
+	@Parameter(names = "-output", converter = FileConverter.class, description = "Destination file of sorted entries (defaults to printf)", order = 3)
 	File output;
 
 	/*
@@ -70,11 +72,13 @@ public class BslCsvReader {
 					.addObject(main)
 					.build();
 
-			mainInstance.parse();//argv);
+			mainInstance.parse(argv);
 			main.run();
 		} catch (Exception e) {
 			// If we ever get here an actual error has been found in the code.
-			e.printStackTrace();
+			// Parameter error.
+			ConsoleLogger.print(PARAMETER_ERROR);
+			ConsoleLogger.error(e.getMessage());
 		}
 	}
 
@@ -95,8 +99,8 @@ public class BslCsvReader {
 
 			String yaml = ConsoleLogger.getEntriesAsYaml(entries);
 			if (output != null) {
-				writeEntriesToFile(entries);
-			} else {
+				writeEntriesToFile(yaml);
+			} else {			
 				ConsoleLogger.print(yaml);
 			}
 
@@ -127,10 +131,10 @@ public class BslCsvReader {
 	/**
 	 * If an output is specified this is where we write the entries to it.
 	 * @param entries
+	 * @throws IOException 
 	 */
-	private void writeEntriesToFile(List<BslEntry> entries) {
-		// TODO Auto-generated method stub
-		
+	private void writeEntriesToFile(String text) throws IOException {
+		Files.write(Paths.get(output.getAbsolutePath()), text.getBytes());
 	}
 
 	/**
@@ -145,7 +149,7 @@ public class BslCsvReader {
 		if (file == null)
 			throw new ParameterException("Input file '-file' must be specified");
 
-		if (file.getName().toLowerCase().endsWith(".csv"))
+		if (! file.getName().toLowerCase().endsWith(".csv"))
 			throw new ParameterException("Input file '-file' must be a CSV format");
 
 		if (! file.exists())

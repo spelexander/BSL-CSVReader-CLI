@@ -64,12 +64,10 @@ public class BslEntry implements Comparable<BslEntry> {
 	 * @param line
 	 * @throws FileReadException 
 	 */
-	public BslEntry(File file, Map<String,Integer> headingIndex, String line, Long lineNum) 
+	public BslEntry(File file, Map<String,Integer> headingIndex, String[] parts, Long lineNum) 
 			throws FileReadException 
 	{
-		
-		String[] parts = line.split(",");
-		
+				
 		Field[] fields = this.getClass().getFields();
 		for (Field field : fields) {
 			// Only using public fields for csv objects

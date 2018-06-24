@@ -7,18 +7,29 @@ import com.spelexander.bsl.model.BslEntry;
 
 public class ConsoleLogger {
 
-	// TODO - Add colours and key word.
-
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_BLACK = "\u001B[30m";
+	public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
+	public static final String ANSI_BLUE = "\u001B[34m";
+	public static final String ANSI_PURPLE = "\u001B[35m";
+	public static final String ANSI_CYAN = "\u001B[36m";
+	public static final String ANSI_WHITE = "\u001B[37m";
+	
 	public static void error(String message) {
-		System.out.println("ERROR: " + message);	
+		System.out.println(ANSI_RED + "ERROR: " + message + ANSI_RESET);	
+		System.out.println("");
 	}
 
 	public static void warn(String message) {
-		System.out.println("WARNING: " + message);
+		System.out.println(ANSI_YELLOW + "WARNING: " + message + ANSI_RESET);
+		System.out.println("");
 	}
 
 	public static void info(String message) {
 		System.out.println("INFO: " + message);
+		System.out.println("");
 	}
 
 	public static void print(String message) {
@@ -31,8 +42,8 @@ public class ConsoleLogger {
 	public static void updateProgress(Double progress) {
 		Double progressBetter = (progress * 100);
 		
-		System.out.print("Working ... " + start + calculateFillChars(progress) + end + " " 
-				+ (progress >= 1 ? "done!" : progressBetter.intValue()  + " %") + " - Memory Usage: " + getMemoryInMB() + "\r");
+		System.out.print(ANSI_GREEN +" - Working ... " + start + calculateFillChars(progress) + end + " " 
+				+ (progress >= 1 ? "done!" : progressBetter.intValue()  + " %") + " - Memory Usage: " + getMemoryInMB() + ANSI_RESET + "\r");
 	}
 
 	private static String calculateFillChars(double progress) {
@@ -52,7 +63,7 @@ public class ConsoleLogger {
 	}
 
 	private final static String RECORDS_TAG = "records:";
-	private final static String DETAILS_TAG = "  details: In division";
+	private final static String DETAILS_TAG = "  details: In division ";
 	private final static String NAME_TAG = "- name: ";
 	private final static String FROM_TAG = " from ";
 	private final static String PERFORMING_TAG = " performing ";

@@ -14,11 +14,6 @@ public class BslReaderTest {
 
 
 	@Test
-	public void failOnIncorrectParams() {
-
-	}
-
-	@Test
 	public void sortedCorrectlyTest() {
 
 		int returnLength = 3;
@@ -42,11 +37,6 @@ public class BslReaderTest {
 		} catch (URISyntaxException | FileReadException | IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	@Test
-	public void performanceTest() {
-
 	}
 
 }

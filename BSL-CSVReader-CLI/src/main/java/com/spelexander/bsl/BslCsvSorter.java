@@ -1,17 +1,16 @@
 package com.spelexander.bsl;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.spelexander.bsl.model.BslEntry;
 import com.spelexander.bsl.model.FileReadException;
 import com.spelexander.bsl.util.ConsoleLogger;
@@ -64,16 +63,17 @@ public class BslCsvSorter {
 		
 		Map<String,Integer> headingIndex = new HashMap<>();
 
-		InputStream inputFS = new FileInputStream(file);
-		BufferedReader br = new BufferedReader(new InputStreamReader(inputFS));
-
+		CsvMapper mapper = new CsvMapper();
+		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+		MappingIterator<String[]> it = mapper.reader(String[].class).readValues(file);
+		
 		// Get file length to make estimate for read time (don't want to call anything that will increase complexity such as lines)
 		Long bytes = file.length();
 		Long expectedLines = bytes / lineSize;
 		
 		// Chose this instead of Java 8 for better exception throwing ability.
-		String line;
-		while ((line = br.readLine()) != null) {
+		while (it.hasNext()) {
+			String[] line = it.next();
 			
 			if (lineNumber == 0) {
 				populateHeadings(line, headingIndex);
@@ -86,18 +86,13 @@ public class BslCsvSorter {
 					cachedEntries.add(entry);
 				}
 			}
-			
-			ConsoleLogger.updateProgress((Double) lineNumber.doubleValue() / expectedLines.doubleValue());
+
+			if (this.progress) {
+				ConsoleLogger.updateProgress((Double) lineNumber.doubleValue() / expectedLines.doubleValue());
+			}
 			lineNumber++;
 		}
-
-		if (br != null) {
-			try {
-				br.close();
-			} catch (IOException e) {
-				// Ignore this resource exception
-			}
-		}
+		ConsoleLogger.print(" ");
 
 		return sortedEntries;
 	}
@@ -120,11 +115,10 @@ public class BslCsvSorter {
 
 	/**
 	 * Get our heading index for later parsing (We don't know what order they will be given to us as!)
-	 * @param headingLine
+	 * @param line
 	 * @param headingIndex
 	 */
-	private void populateHeadings(String headingLine, final Map<String, Integer> headingIndex) {
-		String[] parts = headingLine.split(",");
+	private void populateHeadings(String[] parts, final Map<String, Integer> headingIndex) {
 		int index = 0;
 
 		for (String heading : parts) {
